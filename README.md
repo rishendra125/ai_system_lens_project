@@ -10,7 +10,7 @@ Built as part of the [AI Solutions Portfolio](https://rishendra125.github.io) by
 
 ## Live Demo
 
-**Try it here:** [rishendra125.github.io/ai-system-lens](https://rishendra125.github.io/ai-system-lens)
+**Try it here:** [rishendra125.github.io/ai_system_lens_project](https://rishendra125.github.io/ai_system_lens_project)
 
 You will need an Anthropic API key to enable AI-powered analysis. Your key stays in your browser session only and is never stored on any server. Get one free at [console.anthropic.com](https://console.anthropic.com).
 
@@ -116,6 +116,21 @@ The tool would score around 50-55 if audited by itself. This is intentional - it
 
 ---
 
+## File Structure
+
+```
+ai_system_lens_project/
+├── index.html
+├── README.md
+└── screenshots/
+    ├── stage1-describe.webp
+    ├── stage2-matrix.jpg
+    ├── stage3-deepdive.webp
+    └── stage4-scorecard.webp
+```
+
+---
+
 ## Running locally
 
 No setup needed. Just open `index.html` in a browser. Enter your Anthropic API key when prompted.
@@ -129,7 +144,7 @@ This tool is one of several AI PM tools built to demonstrate applied AI product 
 - **BriefCast** - AI-powered stakeholder reporting generator
 - **PropelIQ** - Commercial proposal intelligence
 - **ValidIQ** - Discovery-to-ROI confidence scorer for finserv PMs
-- **AI System Lens** - AI product risk and design intelligence (this tool)
+- **AI System Lens** - AI product risk and design intelligence (this tool) - [live demo](https://rishendra125.github.io/ai_system_lens_project)
 
 Full portfolio: [rishendra125.github.io](https://rishendra125.github.io)
 
