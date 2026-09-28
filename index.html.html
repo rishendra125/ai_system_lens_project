@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI System Lens</title>
+<style>
+  :root {
+    --bg: #f5f5f0;
+    --surface: #ffffff;
+    --border: #e0e0d8;
+    --accent: #c0392b;
+    --accent-light: #fdf0ee;
+    --text: #1a1a1a;
+    --muted: #666;
+    --classical-bg: #1a1a2e;
+    --llm-bg: #0f3460;
+    --design-col: #16213e;
+    --operate-col: #533483;
+    --tag-classical: #e94560;
+    --tag-llm: #0f9b8e;
+    --green: #27ae60;
+    --yellow: #f39c12;
+    --red: #c0392b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: #111;
+    color: #fff;
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .header-brand { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+  .header-brand span { color: var(--accent); }
+  .header-sub { font-size: 12px; color: #888; margin-top: 2px; }
+  .header-badge {
+    background: var(--accent);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+  }
+
+  /* STEP INDICATOR */
+  .steps {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 0 32px;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+  }
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 20px;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+  }
+  .step.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+  .step.done { color: var(--green); }
+  .step-num {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #eee;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+  }
+  .step.active .step-num { background: var(--accent); color: #fff; }
+  .step.done .step-num { background: var(--green); color: #fff; }
+  .step-arrow { color: #ccc; font-size: 16px; }
+
+  /* MAIN LAYOUT */
+  .main { padding: 28px 32px; max-width: 1100px; margin: 0 auto; }
+
+  /* SECTION TITLES */
+  .section-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .section-sub {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+
+  /* STEP 1: DESCRIBE */
+  #step1 { display: block; }
+  #step2, #step3, #step4 { display: none; }
+
+  .describe-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+  }
+  .describe-box label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+  .describe-box textarea {
+    width: 100%;
+    height: 100px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: none;
+    color: var(--text);
+    background: var(--bg);
+    outline: none;
+    transition: border 0.2s;
+  }
+  .describe-box textarea:focus { border-color: var(--accent); }
+
+  .quick-examples {
+    margin-top: 16px;
+  }
+  .quick-examples p { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+  .example-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    background: var(--accent-light);
+    border: 1px solid #f0c0bb;
+    color: var(--accent);
+    font-size: 12px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .chip:hover { background: var(--accent); color: #fff; }
+  .chip.chip-active, .chip.chip-active:hover { background: var(--accent) !important; color: #fff !important; border-color: var(--accent) !important; font-weight: 700; box-shadow: 0 0 0 3px rgba(192,57,43,0.25); }
+
+  .btn-primary {
+    margin-top: 20px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .btn-primary:hover { opacity: 0.88; }
+
+  /* STEP 2: MATRIX */
+  .matrix-wrapper {
+    display: grid;
+    grid-template-columns: 120px 1fr 1fr;
+    grid-template-rows: 48px 1fr 1fr;
+    gap: 10px;
+  }
+  .matrix-corner { background: transparent; }
+  .matrix-col-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #111;
+    color: #fff;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    gap: 6px;
+  }
+  .matrix-col-label .col-icon { font-size: 16px; }
+  .matrix-row-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    padding: 16px 8px;
+    text-align: center;
+    cursor: default;
+  }
+  .matrix-row-label.classical { background: var(--classical-bg); color: #fff; }
+  .matrix-row-label.llm { background: var(--llm-bg); color: #fff; }
+  .matrix-row-label .row-tag {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    margin-bottom: 4px;
+  }
+  .matrix-row-label .row-desc { font-size: 11px; color: #aaa; }
+
+  .matrix-cell {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .matrix-cell:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+  .matrix-cell.selected { border-color: var(--accent); background: var(--accent-light); box-shadow: 0 4px 20px rgba(192,57,43,0.15); }
+  .matrix-cell.highlighted { border-color: var(--accent); animation: pulse 1s ease-in-out 2; }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(192,57,43,0.3); }
+    50% { box-shadow: 0 0 0 8px rgba(192,57,43,0.1); }
+  }
+
+  .cell-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .cell-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
+  .cell-tag {
+    font-size: 10px;
+    background: #f0f0ea;
+    padding: 2px 8px;
+    border-radius: 10px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .cell-risk {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-top: 8px;
+  }
+  .risk-high { background: #fde8e8; color: var(--red); }
+  .risk-med { background: #fef4e4; color: var(--yellow); }
+  .risk-low { background: #e8f8ee; color: var(--green); }
+
+  .select-check {
+    position: absolute;
+    top: 12px; right: 12px;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+  }
+  .matrix-cell.selected .select-check { display: flex; }
+
+  /* STEP 3: DEEP DIVE */
+  .deep-dive-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .dive-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .dive-card h3 {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .dive-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .dive-item:last-child { border-bottom: none; }
+  .dive-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .dive-label { font-weight: 600; margin-bottom: 2px; }
+  .dive-desc { color: var(--muted); font-size: 12px; }
+
+  /* 7 questions panel */
+  .questions-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .q-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    transition: all 0.2s;
+  }
+  .q-card.critical {
+    border-color: var(--accent);
+    background: var(--accent-light);
+  }
+  .q-card.secondary {
+    border-color: var(--yellow);
+    background: #fefaf0;
+  }
+  .q-num { font-size: 18px; font-weight: 800; color: var(--accent); margin-bottom: 4px; }
+  .q-card.secondary .q-num { color: var(--yellow); }
+  .q-card:not(.critical):not(.secondary) .q-num { color: #ccc; }
+  .q-name { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .q-desc { font-size: 11px; color: var(--muted); }
+  .q-badge {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-top: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .badge-critical { background: var(--accent); color: #fff; }
+  .badge-watch { background: var(--yellow); color: #fff; }
+  .badge-low { background: #eee; color: #999; }
+
+  /* STEP 4: SCORECARD */
+  .scorecard-header {
+    background: #111;
+    border-radius: 12px;
+    padding: 24px 28px;
+    color: #fff;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .score-big { font-size: 52px; font-weight: 800; color: var(--accent); line-height: 1; }
+  .score-label { font-size: 13px; color: #888; margin-top: 4px; }
+  .score-breakdown { display: flex; gap: 24px; }
+  .score-item { text-align: center; }
+  .score-item-val { font-size: 24px; font-weight: 700; }
+  .score-item-label { font-size: 11px; color: #888; margin-top: 2px; }
+
+  .findings-list { display: flex; flex-direction: column; gap: 10px; }
+  .finding {
+    background: var(--surface);
+    border-left: 4px solid var(--border);
+    border-radius: 0 10px 10px 0;
+    padding: 14px 18px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .finding.critical { border-left-color: var(--red); }
+  .finding.warning { border-left-color: var(--yellow); }
+  .finding.ok { border-left-color: var(--green); }
+  .finding-icon { font-size: 18px; flex-shrink: 0; }
+  .finding-title { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+  .finding-desc { font-size: 12px; color: var(--muted); }
+
+  /* NAV BUTTONS */
+  .nav-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 28px;
+  }
+  .btn-sec {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-sec:hover { border-color: var(--accent); color: var(--accent); }
+
+  .placing-banner {
+    background: #111;
+    color: #fff;
+    border-radius: 10px;
+    padding: 14px 20px;
+    font-size: 13px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .placing-banner strong { color: #f0c040; }
+
+  .full-span { grid-column: 1 / -1; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* API KEY GATE */
+  #api-gate {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 9999; padding: 20px;
+  }
+  #api-gate-box {
+    background: #fff; border-radius: 14px; padding: 32px 36px;
+    max-width: 480px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+  #api-gate-box h2 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+  #api-gate-box p { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 20px; }
+  #api-key-input {
+    width: 100%; border: 1px solid var(--border); border-radius: 8px;
+    padding: 11px 14px; font-size: 13px; font-family: monospace;
+    outline: none; margin-bottom: 12px; box-sizing: border-box;
+  }
+  #api-key-input:focus { border-color: var(--accent); }
+  #api-gate-error { font-size: 12px; color: var(--accent); margin-bottom: 10px; display: none; }
+  #api-gate-note {
+    font-size: 11px; color: #999; margin-top: 14px; line-height: 1.5;
+    padding-top: 14px; border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<!-- API KEY GATE -->
+<div id="api-gate">
+  <div id="api-gate-box">
+    <h2>🔍 AI System Lens</h2>
+    <p>This tool uses the Anthropic API to generate AI-powered analysis specific to your product. Enter your own API key to get started — it stays in your browser and is sent only directly to Anthropic.</p>
+    <input type="password" id="api-key-input" placeholder="sk-ant-api03-..." autocomplete="off" onkeydown="if(event.key==='Enter')submitKey()" />
+    <div id="api-gate-error">Invalid key format. Anthropic keys start with sk-ant-</div>
+    <button class="btn-primary" style="width:100%" onclick="submitKey()">Start →</button>
+    <div id="api-gate-note">
+      🔒 Your key is never stored on any server. It lives only in your browser session and is cleared when you close the tab.<br><br>
+      Don't have a key? Get one free at <a href="https://console.anthropic.com" target="_blank" style="color:var(--accent)">console.anthropic.com</a>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <div class="header-brand">AI System <span>Lens</span></div>
+    <div class="header-sub">See your AI product clearly</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div class="header-badge">AI PM</div>
+    <button onclick="clearKey()" style="background:transparent;border:1px solid #444;color:#aaa;font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='#c0392b';this.style.color='#fff'" onmouseout="this.style.borderColor='#444';this.style.color='#aaa'" title="Clear API key and re-enter">🔑 Change Key</button>
+  </div>
+</div>
+
+<!-- STEP INDICATOR -->
+<div class="steps">
+  <div class="step active" id="nav1" onclick="goStep(1)">
+    <div class="step-num">1</div> Describe Your Product
+  </div>
+  <div class="step-arrow">›</div>
+  <div class="step" id="nav2" onclick="goStep(2)">
+    <div class="step-num">2</div> Locate on Matrix
+  </div>
+  <div class="step-arrow">›</div>
+  <div class="step" id="nav3" onclick="goStep(3)">
+    <div class="step-num">3</div> Deep Dive
+  </div>
+  <div class="step-arrow">›</div>
+  <div class="step" id="nav4" onclick="goStep(4)">
+    <div class="step-num">4</div> Audit Scorecard
+  </div>
+</div>
+
+<div class="main">
+
+<!-- STEP 1 -->
+<div id="step1">
+  <div class="section-title">What AI product are you building or auditing?</div>
+  <div class="section-sub">Two ways to get started — pick an example or describe your own.</div>
+
+  <div style="background:#111;color:#e8e8e8;border-radius:10px;padding:14px 18px;font-size:13px;line-height:1.7;margin-bottom:24px;display:flex;gap:12px;align-items:flex-start;">
+    <div style="font-size:18px;flex-shrink:0;margin-top:1px">🔍</div>
+    <div>
+      <strong style="color:#fff;display:block;margin-bottom:4px">How this works</strong>
+      Describe your AI product or pick an example below. The tool places it on a 2x2 matrix (Classical ML vs LLM / Design vs Operate), surfaces the 7 PM questions ranked for your quadrant, and generates a health scorecard with specific gaps and risks -- all powered by Claude.
+    </div>
+  </div>
+
+  <div class="describe-box">
+
+    <!-- PATH A: Examples -->
+    <div style="margin-bottom:24px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <div style="background:#111;color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:5px;letter-spacing:0.5px">QUICK START</div>
+        <span style="font-size:13px;color:var(--muted)">Click any example to pre-fill the description below — edit it to match your actual system</span>
+      </div>
+      <div style="margin-bottom:12px">
+        <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Finserv / Risk</div>
+        <div class="example-chips">
+          <div class="chip" onclick="quickLaunch('fraud')">Credit card fraud detection</div>
+          <div class="chip" onclick="quickLaunch('loan')">Loan default prediction</div>
+          <div class="chip" onclick="quickLaunch('kyc')">KYC document verification</div>
+        </div>
+      </div>
+      <div style="margin-bottom:12px">
+        <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Customer Experience</div>
+        <div class="example-chips">
+          <div class="chip" onclick="quickLaunch('chatbot')">LLM support chatbot</div>
+          <div class="chip" onclick="quickLaunch('voice')">AI voice agent</div>
+          <div class="chip" onclick="quickLaunch('sentiment')">Support ticket sentiment tagger</div>
+        </div>
+      </div>
+      <div style="margin-bottom:12px">
+        <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Internal / Enterprise</div>
+        <div class="example-chips">
+          <div class="chip" onclick="quickLaunch('contract')">Contract review tool</div>
+          <div class="chip" onclick="quickLaunch('knowledge')">Internal knowledge assistant</div>
+          <div class="chip" onclick="quickLaunch('ops')">LLM eval and monitoring pipeline</div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Product / Growth</div>
+        <div class="example-chips">
+          <div class="chip" onclick="quickLaunch('reco')">Product recommendation engine</div>
+          <div class="chip" onclick="quickLaunch('churn')">SaaS churn prediction</div>
+          <div class="chip" onclick="quickLaunch('search')">Search ranking model</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIVIDER -->
+    <div style="display:flex;align-items:center;gap:14px;margin:20px 0">
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+      <div style="font-size:12px;font-weight:700;color:var(--muted);background:var(--surface);padding:0 4px">OR DESCRIBE YOUR OWN</div>
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+    </div>
+
+    <!-- PATH B: Type your own -->
+    <label style="font-size:13px;font-weight:600;display:block;margin-bottom:8px">Write a short description of your AI product</label>
+    <textarea id="productDesc" oninput="onTextInput()" placeholder="e.g. A fraud detection model trained on transaction data... or a GPT-4 chatbot that handles HR queries..."></textarea>
+
+    <div id="type-hint" style="display:none;margin-top:10px;background:#111;color:#fff;border-radius:8px;padding:10px 14px;font-size:13px;gap:8px;align-items:center;"></div>
+
+    <button class="btn-primary" onclick="goStep(2)" style="margin-top:12px">Place on Matrix →</button>
+
+  </div>
+</div>
+
+<!-- STEP 2 -->
+<div id="step2">
+  <div id="placing-banner" class="placing-banner" style="display:none">
+    <span>🎯</span>
+    <div>
+      <div>Based on your description, we suggest: <strong id="suggested-label"></strong> — but you can override below.</div>
+      <div style="font-size:11px;color:#aaa;margin-top:3px">Click any cell to select your quadrant, then hit Deep Dive. Each cell explains what risks live there.</div>
+    </div>
+  </div>
+
+  <div class="section-title">Where does your product live?</div>
+  <div class="section-sub">Pick the quadrant that best fits your system. Each cell tells you the dominant design and operational risks.</div>
+
+  <div class="matrix-wrapper">
+    <div class="matrix-corner"></div>
+    <div class="matrix-col-label"><span class="col-icon">🔧</span> DESIGN &middot; how it's built</div>
+    <div class="matrix-col-label"><span class="col-icon">⚙️</span> OPERATE &middot; how it stays alive</div>
+
+    <div class="matrix-row-label classical">
+      <div class="row-tag">CLASSICAL ML</div>
+      <div class="row-desc">You train your own model</div>
+    </div>
+    <div class="matrix-cell" id="cell-ml-design" onclick="selectCell('ml-design')">
+      <div class="select-check">✓</div>
+      <div class="cell-title">ML System Design</div>
+      <div class="cell-tags">
+        <span class="cell-tag">Models</span>
+        <span class="cell-tag">Features</span>
+        <span class="cell-tag">Attributes</span>
+        <span class="cell-tag">Training data</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted)">How you architect the model, choose features, and define what the system predicts at inference time.</div>
+      <div class="cell-risk risk-med">⚠ Medium Risk</div>
+    </div>
+    <div class="matrix-cell" id="cell-ml-ops" onclick="selectCell('ml-ops')">
+      <div class="select-check">✓</div>
+      <div class="cell-title">MLOps</div>
+      <div class="cell-tags">
+        <span class="cell-tag">Pipelines</span>
+        <span class="cell-tag">Drift</span>
+        <span class="cell-tag">Retraining</span>
+        <span class="cell-tag">Rollout</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted)">How your model stays reliable after launch. Silent prediction decay is the most common and most costly failure mode.</div>
+      <div class="cell-risk risk-high">🔴 High Risk</div>
+    </div>
+
+    <div class="matrix-row-label llm">
+      <div class="row-tag">LLM</div>
+      <div class="row-desc">You call someone else's model</div>
+    </div>
+    <div class="matrix-cell" id="cell-llm-design" onclick="selectCell('llm-design')">
+      <div class="select-check">✓</div>
+      <div class="cell-title">LLM System Design</div>
+      <div class="cell-tags">
+        <span class="cell-tag">Prompts</span>
+        <span class="cell-tag">RAG</span>
+        <span class="cell-tag">Routing</span>
+        <span class="cell-tag">Guardrails</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted)">How you design the LLM stack. Scope, guardrails, and retrieval quality decisions made here determine everything downstream.</div>
+      <div class="cell-risk risk-high">🔴 High Risk</div>
+    </div>
+    <div class="matrix-cell" id="cell-llm-ops" onclick="selectCell('llm-ops')">
+      <div class="select-check">✓</div>
+      <div class="cell-title">LLMOps</div>
+      <div class="cell-tags">
+        <span class="cell-tag">Evals</span>
+        <span class="cell-tag">Cost</span>
+        <span class="cell-tag">Monitoring</span>
+        <span class="cell-tag">Versioning</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted)">How your LLM system is monitored and governed post-launch. Without evals and cost controls, problems surface only after user impact.</div>
+      <div class="cell-risk risk-high">🔴 High Risk</div>
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn-sec" onclick="goStep(1)">← Back</button>
+    <button class="btn-primary" onclick="goStep(3)" id="btn-deep">Deep Dive →</button>
+  </div>
+</div>
+
+<!-- STEP 3 -->
+<div id="step3">
+  <div class="section-title" id="dive-title">LLM System Design: Deep Dive</div>
+  <div class="section-sub">The 7 PM questions ranked by priority for your quadrant</div>
+
+  <div class="questions-grid" id="questions-grid"></div>
+
+  <div class="deep-dive-grid">
+    <div class="dive-card" id="design-risks-card">
+      <h3>🚨 Top Design Risks</h3>
+      <div id="design-risks"></div>
+    </div>
+    <div class="dive-card" id="operate-risks-card">
+      <h3>⚙️ Operational Watch Points</h3>
+      <div id="operate-risks"></div>
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn-sec" onclick="goStep(2)">← Back</button>
+    <button class="btn-primary" onclick="goStep(4)">Run Audit Scorecard →</button>
+  </div>
+</div>
+
+<!-- STEP 4 -->
+<div id="step4">
+  <div class="scorecard-header">
+    <div>
+      <div style="font-size:13px;color:#888;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px">System Health Score</div>
+      <div class="score-big" id="score-num">--</div>
+      <div class="score-label" id="score-label">Loading...</div>
+    </div>
+    <div class="score-breakdown" id="score-breakdown"></div>
+  </div>
+
+  <div class="section-title" style="margin-bottom:14px">Audit Findings</div>
+  <div class="findings-list" id="findings-list"></div>
+
+  <!-- REFINE MY AUDIT PANEL -->
+  <div id="refine-panel" style="margin-top:28px;border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+    <div style="background:#f8f7f2;padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px;">
+      <div style="font-size:22px;flex-shrink:0;margin-top:2px">💡</div>
+      <div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px" id="refine-title">Want a more accurate picture?</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.5" id="refine-subtitle">The findings above are based on what you described. Address the gaps flagged above and the score will update to reflect your actual system. This is one round only -- make it count.</div>
+      </div>
+    </div>
+
+    <!-- Original description (locked for typed path) -->
+    <div id="original-desc-block" style="padding:16px 22px;border-bottom:1px solid var(--border);background:#fff;display:none;">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:8px">Your original description (locked)</div>
+      <div id="original-desc-text" style="font-size:13px;color:#444;line-height:1.6;background:#f5f5f0;padding:12px 14px;border-radius:8px;border-left:3px solid #ccc;"></div>
+    </div>
+
+    <div style="padding:18px 22px;background:#fff;" id="refine-input-block">
+      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:8px" id="refine-label">Add what you missed</label>
+      <textarea id="refineDesc" style="width:100%;height:90px;border:1px solid var(--border);border-radius:8px;padding:12px;font-size:13px;font-family:inherit;resize:none;outline:none;background:var(--bg);transition:border 0.2s;" placeholder="e.g. We handle class imbalance using SMOTE. Our latency target is under 100ms p99. We retrain monthly triggered by drift alerts..." onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;">
+        <div style="font-size:12px;color:var(--muted)" id="refine-used-note" style="display:none"></div>
+        <button class="btn-primary" onclick="runRefinedAudit()" id="refine-btn" style="margin-left:auto">Refine My Audit →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn-sec" onclick="goStep(3)">← Back</button>
+    <button class="btn-primary" onclick="restart()">Start New Audit</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+// ── API KEY GATE ─────────────────────────────────────────────────────
+function submitKey() {
+  const key = document.getElementById('api-key-input').value.trim();
+  const err = document.getElementById('api-gate-error');
+  if (!key.startsWith('sk-ant-')) {
+    err.style.display = 'block';
+    return;
+  }
+  err.style.display = 'none';
+  sessionStorage.setItem('anthropic_key', key);
+  document.getElementById('api-gate').style.display = 'none';
+}
+
+// Check if key already in session
+window.addEventListener('DOMContentLoaded', () => {
+  const stored = sessionStorage.getItem('anthropic_key');
+  if (stored) document.getElementById('api-gate').style.display = 'none';
+});
+
+function clearKey() {
+  sessionStorage.removeItem('anthropic_key');
+  document.getElementById('api-key-input').value = '';
+  document.getElementById('api-gate-error').style.display = 'none';
+  document.getElementById('api-gate').style.display = 'flex';
+}
+// ── END API KEY GATE ─────────────────────────────────────────────────
+
+let selectedCell = null;
+let productType = null;
+
+const examples = {
+  fraud:    'We are building a credit card fraud detection system. We train an XGBoost model on historical transaction data including merchant category, transaction amount, location, and time patterns. The model flags transactions in real time with a fraud score. Flagged transactions above a threshold are blocked automatically; borderline cases go to a manual review queue.',
+  loan:     'We are building a loan default prediction model trained on applicant financial history, employment data, bureau scores, and repayment behaviour. The model outputs a probability of default used by underwriters to approve, reject, or escalate applications. We retrain quarterly on new repayment outcomes.',
+  kyc:      'We are building an ML pipeline that verifies KYC documents. A computer vision model classifies document types (passport, national ID, driver\'s license) and a second model extracts identity fields. Low-confidence extractions are routed to a human review queue. We handle GDPR compliance with PII masking and audit trails.',
+  chatbot:  'We are building an LLM-powered customer support chatbot using GPT-4. It answers policy questions using RAG over our documentation, handles FAQs, and routes complex or sensitive queries to human agents. We have a system prompt that restricts the model to support topics only.',
+  voice:    'We are building an AI voice agent for inbound call center queries. It uses an LLM to understand caller intent, retrieve answers from a knowledge base, and escalate to human agents when confidence is low or the caller requests it. Calls are transcribed and logged for compliance.',
+  sentiment:'We are building a sentiment analysis model trained on historical support tickets to automatically tag tone (positive, neutral, negative) and urgency level. Tags are used to prioritise the support queue and trigger escalation workflows for high-urgency negative tickets.',
+  contract: 'We are building an LLM-powered contract review tool that summarises clauses, flags non-standard terms, and compares contracts against our standard templates. It uses RAG over a library of past contracts and legal guidelines. Output is a risk-ranked summary for legal team review.',
+  knowledge:'We are building an internal knowledge base assistant using RAG over company wikis, policy documents, and HR FAQs. It is powered by an LLM and deployed on Slack. We version our prompt and run weekly evals to check answer quality against a golden set of questions.',
+  ops:      'We are building an LLM monitoring and eval pipeline that tracks prompt quality, cost per call, output drift, and latency across model versions. It runs automated evals on a daily sample of production outputs and alerts the team when quality drops below threshold.',
+  reco:     'We are building a product recommendation engine trained on user purchase history, click data, and dwell time. It uses a two-tower neural network to generate personalised recommendations. The model runs at peak 700 requests per second and is retrained weekly on new interaction data.',
+  churn:    'We are building a churn prediction system for SaaS users. It scores accounts monthly using features like login frequency, feature adoption, support ticket volume, and contract renewal dates. High-risk accounts trigger automated outreach workflows via the CRM.',
+  search:   'We are building a search ranking model trained on user click and dwell-time signals to surface the most relevant product listings. It uses a LambdaMART model re-ranked by a neural model for personalisation. We run A/B tests before every model update to production.'
+};
+
+const suggestions = {
+  fraud: { cell: 'ml-ops', label: 'Classical ML > MLOps' },
+  chatbot: { cell: 'llm-design', label: 'LLM > LLM System Design' },
+  reco: { cell: 'ml-design', label: 'Classical ML > ML System Design' },
+  ops: { cell: 'llm-ops', label: 'LLM > LLMOps' },
+  loan: { cell: 'ml-design', label: 'Classical ML > ML System Design' },
+  churn: { cell: 'ml-ops', label: 'Classical ML > MLOps' },
+  contract: { cell: 'llm-design', label: 'LLM > LLM System Design' },
+  kyc: { cell: 'ml-design', label: 'Classical ML > ML System Design' },
+  voice: { cell: 'llm-design', label: 'LLM > LLM System Design' },
+  search: { cell: 'ml-ops', label: 'Classical ML > MLOps' },
+  knowledge: { cell: 'llm-ops', label: 'LLM > LLMOps' },
+  sentiment: { cell: 'ml-design', label: 'Classical ML > ML System Design' }
+};
+
+const cellData = {
+  'ml-design': {
+    title: 'ML System Design',
+    questions: [
+      { n:1, name:'Functional', desc:'What goes in? What comes out?', priority:'critical' },
+      { n:5, name:'Accuracy', desc:'What is good enough to ship?', priority:'critical' },
+      { n:6, name:'Data', desc:'Where does training data come from?', priority:'critical' },
+      { n:2, name:'Scale', desc:'How many predictions per second?', priority:'secondary' },
+      { n:3, name:'Latency', desc:'How fast must inference run?', priority:'secondary' },
+      { n:4, name:'Freshness', desc:'How often does data need updating?', priority:'low' },
+      { n:7, name:'Constraints', desc:'Regulatory or cost limits?', priority:'low' }
+    ],
+    designRisks: [
+      { icon:'⚙️', label:'Feature leakage', desc:'Training on data that wont be available at inference time' },
+      { icon:'📊', label:'Label quality', desc:'Garbage labels produce confident but wrong models' },
+      { icon:'🎯', label:'Wrong metric', desc:'Optimising for accuracy when you need recall or precision' }
+    ],
+    operateRisks: [
+      { icon:'📉', label:'Model drift', desc:'Distribution shift between training and live data over time' },
+      { icon:'🔄', label:'Retraining cadence', desc:'No scheduled retraining means stale predictions' },
+      { icon:'🚦', label:'Rollout strategy', desc:'No canary or shadow mode means full blast failure risk' }
+    ],
+    score: 70,
+    findings: [
+      { type:'warning', icon:'⚠️', title:'Feature pipeline not monitored', desc:'No drift detection on input features post-deployment' },
+      { type:'ok', icon:'✅', title:'Accuracy baseline defined', desc:'Threshold set at 90% before ship decision' },
+      { type:'critical', icon:'🔴', title:'No retraining schedule', desc:'Model has been live 6 months with no refresh trigger' }
+    ]
+  },
+  'ml-ops': {
+    title: 'MLOps',
+    questions: [
+      { n:4, name:'Freshness', desc:'How often must the model retrain to stay valid?', priority:'critical' },
+      { n:5, name:'Accuracy', desc:'What threshold triggers a retrain or rollback?', priority:'critical' },
+      { n:2, name:'Scale', desc:'Can the pipeline sustain production load?', priority:'critical' },
+      { n:7, name:'Constraints', desc:'Cost and compliance guardrails in production?', priority:'secondary' },
+      { n:3, name:'Latency', desc:'Inference speed under real traffic conditions?', priority:'secondary' },
+      { n:1, name:'Functional', desc:'Are live outputs still matching the original intent?', priority:'low' },
+      { n:6, name:'Data', desc:'Is incoming live data still representative of training?', priority:'low' }
+    ],
+    designRisks: [
+      { icon:'📉', label:'Silent prediction decay', desc:'Model performance degrades gradually with no alert -- damage is discovered weeks later' },
+      { icon:'🔁', label:'No versioned rollback', desc:'Model update fails with no tested path back to the last stable state' },
+      { icon:'🧪', label:'Full-traffic deployment', desc:'Every model change goes directly to 100% of users with no staged validation' }
+    ],
+    operateRisks: [
+      { icon:'📊', label:'Post-launch monitoring gap', desc:'Prediction quality not tracked beyond the initial go-live metrics review' },
+      { icon:'💸', label:'Retraining cost spiral', desc:'Frequent retraining on large datasets compounds GPU and infra spend without clear ROI' },
+      { icon:'🚨', label:'Alert signal noise', desc:'Too many low-signal threshold alerts means genuine distribution shift gets buried' }
+    ],
+    score: 55,
+    findings: [
+      { type:'critical', icon:'🔴', title:'No drift detection in place', desc:'Nothing is alerting when live prediction distribution diverges from training baseline' },
+      { type:'critical', icon:'🔴', title:'Retraining is fully manual', desc:'Engineers must trigger every retraining cycle with no automated cadence or condition' },
+      { type:'warning', icon:'⚠️', title:'Binary deployment strategy', desc:'No canary releases or shadow mode -- every update is all-or-nothing' }
+    ]
+  },
+  'llm-design': {
+    title: 'LLM System Design',
+    questions: [
+      { n:1, name:'Functional', desc:'What exactly should the LLM do and not do?', priority:'critical' },
+      { n:7, name:'Constraints', desc:'What guardrails prevent harmful outputs?', priority:'critical' },
+      { n:5, name:'Accuracy', desc:'What does a good LLM response look like?', priority:'critical' },
+      { n:6, name:'Data', desc:'What context does RAG pull and from where?', priority:'secondary' },
+      { n:3, name:'Latency', desc:'What is acceptable response time for users?', priority:'secondary' },
+      { n:4, name:'Freshness', desc:'How current must the knowledge base be?', priority:'low' },
+      { n:2, name:'Scale', desc:'How many concurrent LLM calls at peak?', priority:'low' }
+    ],
+    designRisks: [
+      { icon:'🚧', label:'Undefined output scope', desc:'No clear boundary on what the LLM is allowed to say -- model fills gaps with confident guesses' },
+      { icon:'🎭', label:'Input manipulation risk', desc:'Crafted user inputs can redirect the model away from its intended role' },
+      { icon:'🔀', label:'Stale retrieval context', desc:'RAG pulls outdated or off-topic documents and the model presents them as fact' }
+    ],
+    operateRisks: [
+      { icon:'💰', label:'Uncapped token spend', desc:'No context window limits or cost controls -- API bills scale with misuse' },
+      { icon:'📏', label:'Output quality blind spot', desc:'No automated check on correctness or safety of responses after launch' },
+      { icon:'🔒', label:'Data leakage in prompts', desc:'Sensitive user data included in prompts sent to external model providers' }
+    ],
+    score: 48,
+    findings: [
+      { type:'critical', icon:'🔴', title:'System prompt has no scope guardrails', desc:'Nothing prevents the model from responding to out-of-scope or harmful requests' },
+      { type:'critical', icon:'🔴', title:'Retrieval layer is unvalidated', desc:'No freshness check, source filter, or relevance threshold on retrieved documents' },
+      { type:'warning', icon:'⚠️', title:'No structured eval pipeline', desc:'Response quality is measured only by downstream user complaints, not automated evals' }
+    ]
+  },
+  'llm-ops': {
+    title: 'LLMOps',
+    questions: [
+      { n:5, name:'Accuracy', desc:'Are evals catching regressions across versions?', priority:'critical' },
+      { n:7, name:'Constraints', desc:'Is cost per call within acceptable range?', priority:'critical' },
+      { n:3, name:'Latency', desc:'Are p95 response times within SLA?', priority:'critical' },
+      { n:4, name:'Freshness', desc:'When was the last eval suite updated?', priority:'secondary' },
+      { n:2, name:'Scale', desc:'Can monitoring handle burst traffic?', priority:'secondary' },
+      { n:1, name:'Functional', desc:'Are outputs still hitting the original brief?', priority:'low' },
+      { n:6, name:'Data', desc:'Is the eval dataset representative?', priority:'low' }
+    ],
+    designRisks: [
+      { icon:'📦', label:'Post-launch behaviour drift', desc:'LLM output quality shifts gradually after go-live with no monitoring catching it until users complain' },
+      { icon:'💸', label:'Invisible cost escalation', desc:'Each prompt or model change silently increases token consumption and per-call spend' },
+      { icon:'🔄', label:'Prompt change tracking gap', desc:'No version control on prompt changes means regressions cannot be traced to a specific edit' }
+    ],
+    operateRisks: [
+      { icon:'🧪', label:'Narrow eval coverage', desc:'Only happy-path scenarios tested -- edge cases, adversarial inputs, and rare queries not covered' },
+      { icon:'🚨', label:'Reactive issue discovery', desc:'Problems surface through user complaints or support tickets, not proactive monitoring dashboards' },
+      { icon:'📈', label:'Provider-side model changes', desc:'Upstream model provider updates behaviour between versions without notice, breaking your outputs' }
+    ],
+    score: 42,
+    findings: [
+      { type:'critical', icon:'🔴', title:'No production output monitoring', desc:'LLM responses are not evaluated automatically -- quality is assumed, not verified' },
+      { type:'critical', icon:'🔴', title:'No API cost controls', desc:'No daily budget threshold or per-user rate limit on API spend' },
+      { type:'warning', icon:'⚠️', title:'Eval suite not current', desc:'Eval set was built before the last round of prompt changes and has not been updated since' }
+    ]
+  }
+};
+
+// ── KEYWORD SCORING ENGINE ──────────────────────────────────────────
+const keywordMap = {
+  'ml-design': {
+    strong: ['feature engineering','training data','label','annotation','annotate','model architecture','train our own','we train','supervised','unsupervised','classification','regression','neural network','xgboost','random forest','gradient boost','feature store','feature selection','data pipeline','ground truth','overfitting','underfitting','hyperparameter','model selection','input features','output label','propensity','tabular'],
+    medium: ['train','model','dataset','features','attributes','accuracy','precision','recall','f1','auc','roc','prediction','inference','baseline','benchmark','scoring'],
+    weak: ['data','ml','machine learning','ai','predict','output']
+  },
+  'ml-ops': {
+    strong: ['retrain','retraining','drift','data drift','concept drift','model drift','staging environment','canary','shadow mode','rollback','model versioning','a/b test','production model','model decay','stale model','no staging','deploy model','model pipeline','pipeline failure','model monitoring','prediction monitoring','serving infrastructure','feature drift','distribution shift'],
+    medium: ['deploy','deployment','production','monitor','rollout','refresh','update model','model update','pipeline','schedule','trigger','alert','threshold','performance degradation'],
+    weak: ['live','launched','release','post-launch']
+  },
+  'llm-design': {
+    strong: ['prompt','prompts','system prompt','rag','retrieval augmented','vector database','vector store','guardrail','guardrails','routing','llm chain','langchain','embedding','semantic search','context window','hallucination','gpt','gpt-4','claude','gemini','openai','anthropic','chatbot','chat bot','conversational ai','fine-tuning','few-shot','zero-shot','chain of thought','retrieval','knowledge base','llm pipeline'],
+    medium: ['language model','large language','llm','generative','generate','summarise','summarize','extract','question answer','q&a','response','output quality','prompt engineering','instructions','system message'],
+    weak: ['ai assistant','bot','agent','chat','answer','query']
+  },
+  'llm-ops': {
+    strong: ['evals','eval pipeline','evaluation','cost per call','token cost','token usage','api cost','api spend','output monitoring','response monitoring','llm monitoring','prompt versioning','prompt registry','model version','latency sla','p95','p99','rate limit','cost control','budget alert','regression test','llmops','output drift','safety filter','content moderation post-launch'],
+    medium: ['monitoring','cost','tokens','budget','alert','quality check','version','latency','performance','track','observe','observability','log','logging'],
+    weak: ['post-launch','after launch','in production','live system']
+  }
+};
+
+// Context modifiers -- ambiguous words resolved by co-occurring context
+const contextModifiers = {
+  'monitoring': { 'prompt|token|llm|gpt|claude': 'llm-ops', 'model|prediction|drift|retrain': 'ml-ops' },
+  'pipeline':   { 'prompt|rag|llm|embedding': 'llm-design', 'retrain|deploy|feature|model': 'ml-ops' },
+  'accuracy':   { 'eval|prompt|response|llm': 'llm-ops', 'train|label|feature|dataset': 'ml-design' },
+  'cost':       { 'token|api|call|llm|gpt': 'llm-ops', 'gpu|compute|infra|cloud': 'ml-ops' }
+};
+
+function scoreText(text) {
+  const t = text.toLowerCase();
+  const scores = { 'ml-design': 0, 'ml-ops': 0, 'llm-design': 0, 'llm-ops': 0 };
+
+  Object.entries(keywordMap).forEach(([cell, tiers]) => {
+    tiers.strong.forEach(kw => { if (t.includes(kw)) scores[cell] += 3; });
+    tiers.medium.forEach(kw => { if (t.includes(kw)) scores[cell] += 1.5; });
+    tiers.weak.forEach(kw  => { if (t.includes(kw)) scores[cell] += 0.5; });
+  });
+
+  // Apply context modifiers for ambiguous words
+  Object.entries(contextModifiers).forEach(([word, contexts]) => {
+    if (t.includes(word)) {
+      Object.entries(contexts).forEach(([pattern, cell]) => {
+        const re = new RegExp(pattern);
+        if (re.test(t)) scores[cell] += 2;
+      });
+    }
+  });
+
+  // Penalise: if "train our own" or "we train" appears, deprioritise LLM cells
+  if (/train our own|we train|trained on|our own model/.test(t)) {
+    scores['llm-design'] *= 0.4;
+    scores['llm-ops']    *= 0.4;
+  }
+  // Penalise: if GPT/Claude/LLM appears prominently, deprioritise classical ML
+  if (/gpt|claude|openai|anthropic|llm|language model/.test(t)) {
+    scores['ml-design'] *= 0.4;
+    scores['ml-ops']    *= 0.4;
+  }
+
+  const maxScore = Math.max(...Object.values(scores));
+  const total    = Object.values(scores).reduce((a,b) => a+b, 0);
+  const best     = Object.entries(scores).sort((a,b) => b[1]-a[1])[0];
+  const confidence = total > 0 ? Math.round((best[1] / total) * 100) : 0;
+
+  return { scores, best: best[0], confidence, maxScore };
+}
+
+const cellLabels = {
+  'ml-design': 'Classical ML > ML System Design',
+  'ml-ops':    'Classical ML > MLOps',
+  'llm-design':'LLM > LLM System Design',
+  'llm-ops':   'LLM > LLMOps'
+};
+
+function onTextInput() {
+  productType = null;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('chip-active'));
+  const text = document.getElementById('productDesc').value;
+  const hint = document.getElementById('type-hint');
+  if (text.trim().length < 10) { hint.style.display = 'none'; return; }
+
+  const result = scoreText(text);
+  hint.style.display = 'flex';
+
+  if (result.confidence >= 40) {
+    hint.innerHTML = `<span>🎯</span> <div><div>Looks like <strong style="color:#f0c040">${cellLabels[result.best]}</strong> — confidence ${result.confidence}%. Hit Place on Matrix to confirm.</div><div style="font-size:11px;color:#aaa;margin-top:3px">Based on keywords in your description. You can override this on the next screen.</div></div>`;
+    hint.style.background = '#111';
+  } else if (result.maxScore > 0) {
+    hint.innerHTML = `<span>🤔</span> <div><div>Could fit multiple quadrants.</div><div style="font-size:11px;color:#aaa;margin-top:3px">Hit Place on Matrix and click the quadrant that best fits your system.</div></div>`;
+    hint.style.background = '#333';
+  } else {
+    hint.innerHTML = `<span>💡</span> <div><div>Need a bit more detail.</div><div style="font-size:11px;color:#aaa;margin-top:3px">Try adding whether you train your own model or call an external LLM like GPT-4.</div></div>`;
+    hint.style.background = '#555';
+  }
+}
+// ── END SCORING ENGINE ───────────────────────────────────────────────
+
+function fillExample(type) {
+  productType = type;
+  document.getElementById('productDesc').value = examples[type];
+  onTextInput();
+}
+
+function quickLaunch(type) {
+  productType = type;
+  document.getElementById('productDesc').value = examples[type];
+
+  // Highlight the clicked chip, clear others
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('chip-active'));
+  event.currentTarget.classList.add('chip-active');
+
+  document.getElementById('productDesc').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  document.getElementById('productDesc').focus();
+  const hint = document.getElementById('type-hint');
+  hint.style.display = 'flex';
+  hint.style.background = '#1a5276';
+  hint.innerHTML = `<span>✏️</span> <span>Pre-filled for <strong style="color:#f0c040">${event.currentTarget.textContent.trim()}</strong> — edit to match your actual system, then hit Place on Matrix.</span>`;
+  onTextInput();
+}
+
+function goStep(n) {
+  [1,2,3,4].forEach(i => {
+    document.getElementById('step'+i).style.display = i===n ? 'block' : 'none';
+    const nav = document.getElementById('nav'+i);
+    nav.className = 'step' + (i===n ? ' active' : i<n ? ' done' : '');
+  });
+
+  // For typed text, score it and auto-select
+  if (n === 2) {
+    const text = document.getElementById('productDesc').value;
+    if (!productType && text.trim().length > 10) {
+      const result = scoreText(text);
+      if (result.confidence >= 40) {
+        document.getElementById('placing-banner').style.display = 'flex';
+        document.getElementById('suggested-label').textContent = cellLabels[result.best] + ' (' + result.confidence + '% confidence)';
+        selectCell(result.best);
+      } else {
+        // Low confidence -- show banner asking user to pick
+        document.getElementById('placing-banner').style.display = 'flex';
+        document.getElementById('suggested-label').textContent = 'unclear -- please click the best-fit quadrant below';
+        document.querySelectorAll('.matrix-cell').forEach(c => c.classList.remove('selected','highlighted'));
+        selectedCell = null;
+      }
+    }
+  }
+
+  if (n === 2 && productType && suggestions[productType]) {
+    const sug = suggestions[productType];
+    document.getElementById('placing-banner').style.display = 'flex';
+    document.getElementById('suggested-label').textContent = sug.label;
+    selectCell(sug.cell);
+  }
+
+  if (n === 3 && selectedCell) {
+    renderDeepDive(selectedCell);
+  } else if (n === 3 && !selectedCell) {
+    goStep(1);
+    return;
+  }
+
+  if (n === 4 && selectedCell) {
+    renderScorecard(selectedCell);
+  } else if (n === 4 && !selectedCell) {
+    // State lost -- redirect to Step 1
+    goStep(1);
+    return;
+  }
+}
+
+function selectCell(cellId) {
+  document.querySelectorAll('.matrix-cell').forEach(c => c.classList.remove('selected', 'highlighted'));
+  const el = document.getElementById('cell-' + cellId);
+  if (el) { el.classList.add('selected', 'highlighted'); }
+  selectedCell = cellId;
+}
+
+// ── CLAUDE API ENGINE ────────────────────────────────────────────────
+let aiCache = {};
+
+function buildPrompt(productDesc, cellId) {
+  const cellName = {
+    'ml-design': 'ML System Design (Classical ML)',
+    'ml-ops':    'MLOps (Classical ML)',
+    'llm-design':'LLM System Design',
+    'llm-ops':   'LLMOps'
+  }[cellId];
+
+  return `You are an expert AI Product Manager. A PM described their AI product and placed it in the "${cellName}" quadrant of the AI 2x2 matrix (Classical ML vs LLM / Design vs Operate).
+
+Product description: "${productDesc}"
+
+Return ONLY valid JSON, no markdown fences, no preamble:
+{"quadrantConfirmed":true,"quadrantNote":"one sentence on why this quadrant fits or a gentle correction","healthScore":0,"scoreRationale":"one sentence explaining the score","questions":[{"n":1,"name":"Functional","desc":"specific to their product","priority":"critical"},{"n":2,"name":"Scale","desc":"specific","priority":"low"},{"n":3,"name":"Latency","desc":"specific","priority":"low"},{"n":4,"name":"Freshness","desc":"specific","priority":"low"},{"n":5,"name":"Accuracy","desc":"specific","priority":"low"},{"n":6,"name":"Data","desc":"specific","priority":"low"},{"n":7,"name":"Constraints","desc":"specific","priority":"low"}],"designRisks":[{"icon":"⚠️","label":"risk name","desc":"specific 1 sentence"},{"icon":"🔴","label":"risk name","desc":"specific"},{"icon":"📉","label":"risk name","desc":"specific"}],"operateRisks":[{"icon":"📊","label":"risk name","desc":"specific"},{"icon":"🚨","label":"risk name","desc":"specific"},{"icon":"💸","label":"risk name","desc":"specific"}],"findings":[{"type":"critical","icon":"🔴","title":"finding","desc":"specific to what they said or didn't say"},{"type":"critical","icon":"🔴","title":"finding","desc":"specific"},{"type":"warning","icon":"⚠️","title":"finding","desc":"specific"}]}
+
+Rules: All 7 questions must appear, reorder and set priority (critical/secondary/low) based on what matters most for their specific product in this quadrant. designRisks and operateRisks: exactly 3 each, specific to what they described. findings: 3-4 items -- if they mention something good mark it ok, gaps = critical or warning. healthScore: start 100, deduct 20 per critical gap implied, 10 per warning gap. Be specific to their product, never generic.`;
+}
+
+function showLoading(containerId, message) {
+  document.getElementById(containerId).innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;padding:20px;color:var(--muted);font-size:13px">
+      <div style="width:18px;height:18px;border:2px solid var(--accent);border-top-color:transparent;border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0"></div>
+      ${message}
+    </div>`;
+}
+
+async function renderDeepDive(cellId) {
+  // Use textarea value, fall back to the example text if chip was used
+  const desc = document.getElementById('productDesc').value.trim() ||
+               (productType ? examples[productType] : '') ||
+               'No description provided';
+
+  document.getElementById('dive-title').textContent = cellData[cellId].title + ': Deep Dive';
+  document.getElementById('questions-grid').innerHTML = `
+    <div style="grid-column:1/-1;display:flex;align-items:center;gap:10px;padding:16px;color:var(--muted);font-size:13px">
+      <div style="width:18px;height:18px;border:2px solid var(--accent);border-top-color:transparent;border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0"></div>
+      Claude is reading your product description...
+    </div>`;
+  showLoading('design-risks', 'Generating risks specific to your product...');
+  document.getElementById('operate-risks').innerHTML = '';
+
+  const cacheKey = cellId + '::' + desc.trim().slice(0,80);
+  let ai = aiCache[cacheKey] || null;
+
+  if (!ai) {
+    try {
+      const apiKey = sessionStorage.getItem('anthropic_key');
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 2000,
+          messages: [{ role: 'user', content: buildPrompt(desc, cellId) }]
+        })
+      });
+      if (!response.ok) throw new Error('API error ' + response.status);
+      const data = await response.json();
+      const text = data.content.map(b => b.text || '').join('');
+      const clean = text.replace(/```json[\s\S]*?```|```/g, '').trim();
+      ai = JSON.parse(clean);
+      aiCache[cacheKey] = ai;
+    } catch(e) {
+      console.error('API error:', e.message);
+    }
+  }
+
+  if (!ai) {
+    document.getElementById('questions-grid').innerHTML = `
+      <div style="grid-column:1/-1;background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:12px 16px;font-size:12px;color:#856404">
+        ⚠️ AI analysis could not load. Check your API key or try again.
+      </div>`;
+  }
+
+  const questions = ai ? ai.questions : cellData[cellId].questions;
+  const risks     = ai ? ai.designRisks  : cellData[cellId].designRisks;
+  const ops       = ai ? ai.operateRisks : cellData[cellId].operateRisks;
+
+  if (ai && ai.quadrantNote) {
+    document.getElementById('dive-title').innerHTML =
+      cellData[cellId].title + ': Deep Dive' +
+      `<div style="font-size:12px;font-weight:400;color:var(--muted);margin-top:4px">✦ ${ai.quadrantNote}</div>`;
+  }
+
+  const qGrid = document.getElementById('questions-grid');
+  if (ai) qGrid.innerHTML = '';
+  qGrid.innerHTML += questions.slice(0, 7).map(q => `
+    <div class="q-card ${q.priority}">
+      <div class="q-num">${q.n}</div>
+      <div class="q-name">${q.name}</div>
+      <div class="q-desc">${q.desc}</div>
+      <div class="q-badge badge-${q.priority==='critical'?'critical':q.priority==='secondary'?'watch':'low'}">
+        ${q.priority==='critical'?'Critical':q.priority==='secondary'?'Watch':'Low'}
+      </div>
+    </div>`).join('');
+
+  document.getElementById('design-risks').innerHTML = risks.map(r => `
+    <div class="dive-item">
+      <div class="dive-icon">${r.icon}</div>
+      <div><div class="dive-label">${r.label}</div><div class="dive-desc">${r.desc}</div></div>
+    </div>`).join('');
+
+  document.getElementById('operate-risks').innerHTML = ops.map(r => `
+    <div class="dive-item">
+      <div class="dive-icon">${r.icon}</div>
+      <div><div class="dive-label">${r.label}</div><div class="dive-desc">${r.desc}</div></div>
+    </div>`).join('');
+}
+
+async function renderScorecard(cellId) {
+  const desc = document.getElementById('productDesc').value.trim() ||
+               (productType ? examples[productType] : '') ||
+               'No description provided';
+  const cacheKey = cellId + '::' + desc.trim().slice(0,80);
+
+  document.getElementById('score-num').textContent = '--';
+  document.getElementById('score-label').textContent = 'Analysing your product...';
+  document.getElementById('score-breakdown').innerHTML = '';
+  showLoading('findings-list', 'Claude is generating your personalised audit scorecard...');
+
+  let ai = aiCache[cacheKey] || null;
+
+  if (!ai) {
+    try {
+      const apiKey = sessionStorage.getItem('anthropic_key');
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 2000,
+          messages: [{ role: 'user', content: buildPrompt(desc, cellId) }]
+        })
+      });
+      if (!response.ok) throw new Error('API error ' + response.status);
+      const data = await response.json();
+      const text = data.content.map(b => b.text || '').join('');
+      const clean = text.replace(/```json[\s\S]*?```|```/g, '').trim();
+      ai = JSON.parse(clean);
+      aiCache[cacheKey] = ai;
+    } catch(e) {
+      console.error('API error:', e.message);
+    }
+  }
+  const score     = ai ? ai.healthScore    : cellData[cellId].score;
+  const findings  = ai ? ai.findings       : cellData[cellId].findings;
+  const rationale = ai ? ai.scoreRationale : '';
+
+  document.getElementById('score-num').textContent = score;
+  document.getElementById('score-num').style.color =
+    score >= 75 ? '#27ae60' : score >= 50 ? '#f39c12' : '#c0392b';
+  document.getElementById('score-label').innerHTML =
+    (score >= 75 ? 'Good Shape -- Minor Improvements Needed' :
+     score >= 50 ? 'Moderate Risk -- Action Required' :
+     'High Risk -- Immediate Attention Needed') +
+    (rationale ? `<div style="font-size:11px;color:#aaa;margin-top:4px">${rationale}</div>` : '');
+
+  document.getElementById('score-breakdown').innerHTML = `
+    <div class="score-item"><div class="score-item-val" style="color:#e74c3c">${findings.filter(f=>f.type==='critical').length}</div><div class="score-item-label">Critical</div></div>
+    <div class="score-item"><div class="score-item-val" style="color:#f39c12">${findings.filter(f=>f.type==='warning').length}</div><div class="score-item-label">Warnings</div></div>
+    <div class="score-item"><div class="score-item-val" style="color:#27ae60">${findings.filter(f=>f.type==='ok').length}</div><div class="score-item-label">Passing</div></div>
+  `;
+
+  document.getElementById('findings-list').innerHTML = findings.map(f => `
+    <div class="finding ${f.type}">
+      <div class="finding-icon">${f.icon}</div>
+      <div><div class="finding-title">${f.title}</div><div class="finding-desc">${f.desc}</div></div>
+    </div>`).join('');
+
+  // Set up refine panel based on entry path
+  setupRefinePanel(cellId, desc);
+}
+// ── END CLAUDE API ENGINE ────────────────────────────────────────────
+
+function setupRefinePanel(cellId, baseDesc) {
+  const isChip = !!productType;
+  const panel = document.getElementById('refine-panel');
+  const originalBlock = document.getElementById('original-desc-block');
+  const refineLabel = document.getElementById('refine-label');
+  const refineSubtitle = document.getElementById('refine-subtitle');
+  const refineTitle = document.getElementById('refine-title');
+  document.getElementById('refineDesc').value = '';
+  document.getElementById('refine-btn').disabled = false;
+  document.getElementById('refine-btn').textContent = 'Refine My Audit →';
+
+  if (isChip) {
+    // Chip path -- description is a generic example, let them fully replace it
+    refineTitle.textContent = 'This was a generic example. Make it yours.';
+    refineSubtitle.textContent = 'The pre-filled description is a starting point. Replace it below with what your actual system does and get a score that reflects your real product.';
+    refineLabel.textContent = 'Describe your actual system';
+    document.getElementById('refineDesc').placeholder = 'Replace with your real product details -- what it does, how it handles the gaps flagged above, your data strategy, accuracy targets...';
+    originalBlock.style.display = 'none';
+  } else {
+    // Typed path -- original locked, additive only
+    refineTitle.textContent = 'Want a more accurate picture?';
+    refineSubtitle.textContent = 'Your original description is locked below. Add only what you missed -- details that address the gaps flagged above. One round only.';
+    refineLabel.textContent = 'Add what you missed (additive only)';
+    document.getElementById('refineDesc').placeholder = 'e.g. We handle class imbalance using SMOTE. Latency target is under 100ms p99. We retrain monthly triggered by drift alerts...';
+    originalBlock.style.display = 'block';
+    document.getElementById('original-desc-text').textContent = baseDesc;
+  }
+}
+
+async function runRefinedAudit() {
+  const btn = document.getElementById('refine-btn');
+  const addedText = document.getElementById('refineDesc').value.trim();
+  if (!addedText) {
+    document.getElementById('refineDesc').style.borderColor = 'var(--accent)';
+    document.getElementById('refineDesc').placeholder = 'Please add some detail before refining...';
+    return;
+  }
+
+  const isChip = !!productType;
+  const baseDesc = document.getElementById('productDesc').value.trim() ||
+                   (productType ? examples[productType] : '') || '';
+
+  // Chip: replace entirely. Typed: combine original + addition
+  const fullDesc = isChip
+    ? addedText
+    : baseDesc + '\n\nAdditional context: ' + addedText;
+
+  // Disable refine panel after one use
+  btn.disabled = true;
+  btn.textContent = 'Refining...';
+  document.getElementById('refineDesc').disabled = true;
+
+  // Clear cache so re-run uses new description
+  const cacheKey = selectedCell + '::' + fullDesc.trim().slice(0,80);
+  delete aiCache[cacheKey];
+
+  // Also update the productDesc textarea so renderScorecard picks up new desc
+  document.getElementById('productDesc').value = fullDesc;
+  if (isChip) productType = null; // treated as typed now
+
+  // Show loading in findings
+  document.getElementById('score-num').textContent = '--';
+  document.getElementById('score-label').textContent = 'Refining your audit...';
+  document.getElementById('score-breakdown').innerHTML = '';
+  document.getElementById('findings-list').innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;padding:20px;color:var(--muted);font-size:13px">
+      <div style="width:18px;height:18px;border:2px solid var(--accent);border-top-color:transparent;border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0"></div>
+      Claude is re-analysing with your additional context...
+    </div>`;
+
+  // Hide refine panel and show "refined" badge
+  document.getElementById('refine-panel').innerHTML = `
+    <div style="background:#e8f8ee;border:1px solid #a8d8b8;border-radius:12px;padding:14px 20px;display:flex;align-items:center;gap:10px;font-size:13px;color:#1a6b3a">
+      <span>✅</span>
+      <span><strong>Audit refined.</strong> Score updated based on your additional context. This was your one refinement round.</span>
+    </div>`;
+
+  await renderScorecard(selectedCell);
+}
+
+function restart() {
+  productType = null;
+  selectedCell = null;
+  aiCache = {};
+  document.getElementById('productDesc').value = '';
+  document.getElementById('refineDesc').value = '';
+  document.getElementById('placing-banner').style.display = 'none';
+  document.querySelectorAll('.matrix-cell').forEach(c => c.classList.remove('selected','highlighted'));
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('chip-active'));
+  goStep(1);
+}
+</script>
+</body>
+</html>
