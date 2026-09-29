@@ -445,15 +445,28 @@
 <div id="api-gate">
   <div id="api-gate-box">
     <h2>🔍 AI System Lens</h2>
-    <p>This tool uses the Anthropic API to generate AI-powered analysis specific to your product. Enter your own API key to get started — it stays in your browser and is sent only directly to Anthropic.</p>
+    <p>This tool uses the Anthropic API to generate AI-powered analysis specific to your product. Enter your own API key to get started - it stays in your browser and is sent only directly to Anthropic.</p>
     <input type="password" id="api-key-input" placeholder="sk-ant-api03-..." autocomplete="off" onkeydown="if(event.key==='Enter')submitKey()" />
     <div id="api-gate-error">Invalid key format. Anthropic keys start with sk-ant-</div>
-    <button class="btn-primary" style="width:100%" onclick="submitKey()">Start →</button>
+    <button class="btn-primary" style="width:100%" onclick="submitKey()">Start with my API key →</button>
+    <div style="display:flex;align-items:center;gap:12px;margin:18px 0">
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+      <div style="font-size:12px;color:var(--muted);font-weight:600">OR</div>
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+    </div>
+    <button onclick="startDemo()" style="width:100%;background:transparent;border:1.5px solid var(--accent);color:var(--accent);padding:11px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">Try Demo Mode - no key needed</button>
+    <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:6px">3 pre-loaded examples: Credit card fraud detection, LLM support chatbot, SaaS churn prediction</div>
     <div id="api-gate-note">
       🔒 Your key is never stored on any server. It lives only in your browser session and is cleared when you close the tab.<br><br>
       Don't have a key? Get one free at <a href="https://console.anthropic.com" target="_blank" style="color:var(--accent)">console.anthropic.com</a>
     </div>
   </div>
+</div>
+
+<!-- DEMO BANNER -->
+<div id="demo-banner" style="display:none;background:#1a5276;color:#fff;padding:10px 32px;font-size:13px;align-items:center;gap:12px;">
+  <span>🎬</span>
+  <span><strong>Demo Mode</strong> - showing pre-recorded results for 3 example products. <button onclick="exitDemo()" style="background:none;border:none;color:#f0c040;text-decoration:underline;cursor:pointer;font-size:inherit;padding:0">Enter your API key</button> to analyse your own product.</span>
 </div>
 
 <!-- HEADER -->
@@ -513,51 +526,59 @@
       <div style="margin-bottom:12px">
         <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Finserv / Risk</div>
         <div class="example-chips">
-          <div class="chip" onclick="quickLaunch('fraud')">Credit card fraud detection</div>
-          <div class="chip" onclick="quickLaunch('loan')">Loan default prediction</div>
-          <div class="chip" onclick="quickLaunch('kyc')">KYC document verification</div>
+          <div class="chip" data-type="fraud" onclick="quickLaunch('fraud')">Credit card fraud detection</div>
+          <div class="chip" data-type="loan" onclick="quickLaunch('loan')">Loan default prediction</div>
+          <div class="chip" data-type="kyc" onclick="quickLaunch('kyc')">KYC document verification</div>
         </div>
       </div>
       <div style="margin-bottom:12px">
         <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Customer Experience</div>
         <div class="example-chips">
-          <div class="chip" onclick="quickLaunch('chatbot')">LLM support chatbot</div>
-          <div class="chip" onclick="quickLaunch('voice')">AI voice agent</div>
-          <div class="chip" onclick="quickLaunch('sentiment')">Support ticket sentiment tagger</div>
+          <div class="chip" data-type="chatbot" onclick="quickLaunch('chatbot')">LLM support chatbot</div>
+          <div class="chip" data-type="voice" onclick="quickLaunch('voice')">AI voice agent</div>
+          <div class="chip" data-type="sentiment" onclick="quickLaunch('sentiment')">Support ticket sentiment tagger</div>
         </div>
       </div>
       <div style="margin-bottom:12px">
         <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Internal / Enterprise</div>
         <div class="example-chips">
-          <div class="chip" onclick="quickLaunch('contract')">Contract review tool</div>
-          <div class="chip" onclick="quickLaunch('knowledge')">Internal knowledge assistant</div>
-          <div class="chip" onclick="quickLaunch('ops')">LLM eval and monitoring pipeline</div>
+          <div class="chip" data-type="contract" onclick="quickLaunch('contract')">Contract review tool</div>
+          <div class="chip" data-type="knowledge" onclick="quickLaunch('knowledge')">Internal knowledge assistant</div>
+          <div class="chip" data-type="ops" onclick="quickLaunch('ops')">LLM eval and monitoring pipeline</div>
         </div>
       </div>
       <div>
         <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Product / Growth</div>
         <div class="example-chips">
-          <div class="chip" onclick="quickLaunch('reco')">Product recommendation engine</div>
-          <div class="chip" onclick="quickLaunch('churn')">SaaS churn prediction</div>
-          <div class="chip" onclick="quickLaunch('search')">Search ranking model</div>
+          <div class="chip" data-type="reco" onclick="quickLaunch('reco')">Product recommendation engine</div>
+          <div class="chip" data-type="churn" onclick="quickLaunch('churn')">SaaS churn prediction</div>
+          <div class="chip" data-type="search" onclick="quickLaunch('search')">Search ranking model</div>
         </div>
+      </div>
+
+      <!-- Demo mode note -->
+      <div id="demo-chips-note" style="display:none;margin-top:14px;background:#1a5276;color:#fff;border-radius:8px;padding:10px 14px;font-size:12px;">
+        🎬 <strong>Demo mode:</strong> 3 examples have pre-recorded analysis (highlighted). Others require an API key. <button onclick="exitDemo()" style="background:none;border:none;color:#f0c040;text-decoration:underline;cursor:pointer;font-size:inherit;padding:0">Enter key to unlock all</button>
       </div>
     </div>
 
     <!-- DIVIDER -->
-    <div style="display:flex;align-items:center;gap:14px;margin:20px 0">
+    <div id="own-desc-section" style="display:block">
+    <div id="own-desc-divider" style="display:flex;align-items:center;gap:14px;margin:20px 0">
       <div style="flex:1;height:1px;background:var(--border)"></div>
       <div style="font-size:12px;font-weight:700;color:var(--muted);background:var(--surface);padding:0 4px">OR DESCRIBE YOUR OWN</div>
       <div style="flex:1;height:1px;background:var(--border)"></div>
     </div>
 
     <!-- PATH B: Type your own -->
+    <div id="own-desc-input">
     <label style="font-size:13px;font-weight:600;display:block;margin-bottom:8px">Write a short description of your AI product</label>
     <textarea id="productDesc" oninput="onTextInput()" placeholder="e.g. A fraud detection model trained on transaction data... or a GPT-4 chatbot that handles HR queries..."></textarea>
-
     <div id="type-hint" style="display:none;margin-top:10px;background:#111;color:#fff;border-radius:8px;padding:10px 14px;font-size:13px;gap:8px;align-items:center;"></div>
+    </div>
 
     <button class="btn-primary" onclick="goStep(2)" style="margin-top:12px">Place on Matrix →</button>
+    </div>
 
   </div>
 </div>
@@ -718,7 +739,115 @@
 </div>
 
 <script>
-// ── API KEY GATE ─────────────────────────────────────────────────────
+// ── DEMO MODE DATA ───────────────────────────────────────────────────
+const demoData = {
+  fraud: {
+    cellId: 'ml-design',
+    deepDive: {
+      quadrantNote: 'This is a textbook Classical ML system design case - structured tabular features, a gradient-boosted tree model, and a real-time scoring pipeline with human-in-the-loop review.',
+      questions: [
+        { n:1, name:'Functional', desc:'How is fraud ground truth defined and labeled - confirmed chargebacks, customer disputes, or manual review outcomes - and how do you handle label lag (fraud confirmed weeks later)?', priority:'critical' },
+        { n:2, name:'Data', desc:'How do you handle extreme class imbalance (fraud is typically under 1% of transactions) in XGBoost training, and how do you prevent data leakage from features like time-of-transaction relative to the label window?', priority:'critical' },
+        { n:3, name:'Accuracy', desc:'What are your target precision/recall tradeoffs at the block threshold, and what is the business cost model for false positives (blocking legitimate purchases) vs false negatives (missed fraud)?', priority:'critical' },
+        { n:4, name:'Latency', desc:'What is the p99 latency budget for real-time scoring at point-of-sale/authorization, and what happens if the model service times out?', priority:'secondary' },
+        { n:5, name:'Freshness', desc:'How often is the model retrained as fraud patterns and merchant behavior shift, and is there drift detection triggering retraining?', priority:'secondary' },
+        { n:6, name:'Scale', desc:'What is peak transaction volume (e.g. holiday shopping surges) and does the scoring infrastructure autoscale accordingly?', priority:'low' },
+        { n:7, name:'Constraints', desc:'Are there regulatory requirements (e.g. Reg E, fair lending) around explainability for auto-blocked transactions or adverse action notices?', priority:'low' }
+      ],
+      designRisks: [
+        { icon:'⚠️', label:'Label leakage and imbalance', desc:'With fraud as a rare event, naive train/test splits risk leaking future information and inflating offline metrics that will not hold in production.' },
+        { icon:'🔴', label:'No explainability for reviewers', desc:'A raw XGBoost fraud score gives manual reviewers no reasoning, slowing down the review queue and risking inconsistent human overrides.' },
+        { icon:'📉', label:'Threshold miscalibration risk', desc:'A single static threshold for auto-block vs manual review does not account for varying fraud cost by merchant category or transaction size.' }
+      ],
+      operateRisks: [
+        { icon:'📊', label:'No drift monitoring described', desc:'Fraud patterns evolve fast as adversarial actors adapt, and there is no mention of monitoring feature or score drift to trigger retraining.' },
+        { icon:'🚨', label:'No feedback loop from review queue', desc:'Outcomes from the manual review team are not described as flowing back into training data, so the model may never learn from its own errors.' },
+        { icon:'💸', label:'False positive cost blindspot', desc:'Auto-blocking transactions above threshold has real customer/revenue cost, but there is no mention of tracking false-positive rate or customer friction as an ops metric.' }
+      ]
+    },
+    scorecard: {
+      healthScore: 40,
+      scoreRationale: 'Two critical gaps (class imbalance strategy and label-delay/feedback loop) and two warnings (latency SLA, drift monitoring) are unaddressed, which are foundational for a real-time fraud system.',
+      findings: [
+        { type:'warning', icon:'⚠️', title:'No class imbalance strategy mentioned', desc:'With fraud typically under 1% of transactions, the description does not address how XGBoost training handles this imbalance, risking a model that under-detects true fraud.' },
+        { type:'critical', icon:'🔴', title:'No label delay/retraining feedback loop described', desc:'Chargeback-confirmed fraud labels arrive with significant lag, but there is no mention of how this affects retraining freshness or label quality.' },
+        { type:'warning', icon:'⚠️', title:'No real-time latency SLA specified', desc:'The system claims real-time flagging at authorization time, but no p99 latency target or infrastructure detail is given to validate this is achievable.' },
+        { type:'warning', icon:'⚠️', title:'No drift monitoring or retraining cadence mentioned', desc:'Fraud patterns change quickly, but the description does not cover how model performance is monitored in production or how often it is refreshed.' }
+      ]
+    }
+  },
+  chatbot: {
+    cellId: 'llm-design',
+    deepDive: {
+      quadrantNote: 'This is a classic LLM System Design problem - you are orchestrating a third-party model with RAG, routing logic, and guardrails rather than training your own.',
+      questions: [
+        { n:1, name:'Functional', desc:'What exactly should the LLM do and not do - which policy topics are in scope, what happens when a customer asks something outside the knowledge base, and what triggers escalation to a human agent?', priority:'critical' },
+        { n:7, name:'Constraints', desc:'What guardrails prevent the model from making unauthorized commitments, sharing incorrect policy information, or responding to off-topic or harmful requests?', priority:'critical' },
+        { n:5, name:'Accuracy', desc:'What does a good LLM response look like - how is correctness defined, and how do you evaluate whether policy answers are accurate before and after deployment?', priority:'critical' },
+        { n:6, name:'Data', desc:'What context does RAG pull and from where - which documents, how fresh are they, and how do you handle conflicting policy versions?', priority:'secondary' },
+        { n:3, name:'Latency', desc:'What is the acceptable response time for users, and how does RAG retrieval latency affect the end-to-end experience?', priority:'secondary' },
+        { n:4, name:'Freshness', desc:'How current must the knowledge base be, and what is the process when policies change?', priority:'low' },
+        { n:2, name:'Scale', desc:'How many concurrent LLM calls at peak, and is there a rate limit or cost cap in place?', priority:'low' }
+      ],
+      designRisks: [
+        { icon:'🚧', label:'Undefined output scope', desc:'No clear boundary on what the LLM is allowed to say - the model fills gaps with confident guesses when policy documents do not cover a question.' },
+        { icon:'🎭', label:'Input manipulation risk', desc:'Crafted user inputs can redirect the model away from its intended support role without explicit prompt injection guardrails.' },
+        { icon:'🔀', label:'Stale retrieval context', desc:'RAG pulls from policy documents but if those documents are not versioned or freshness-checked, the model presents outdated information as fact.' }
+      ],
+      operateRisks: [
+        { icon:'💰', label:'Uncapped token spend', desc:'No context window limits or cost controls means API bills scale with misuse or unexpectedly long conversations.' },
+        { icon:'📏', label:'Output quality blind spot', desc:'No automated check on correctness or safety of responses after launch - quality is measured only through customer complaints.' },
+        { icon:'🔒', label:'Data leakage in prompts', desc:'Customer account details or sensitive query context included in prompts sent to the external model provider.' }
+      ]
+    },
+    scorecard: {
+      healthScore: 48,
+      scoreRationale: 'The description covers the use case and routing intent but has critical gaps on guardrails, eval framework, and RAG source validation.',
+      findings: [
+        { type:'critical', icon:'🔴', title:'No guardrails on output scope', desc:'The system prompt does not appear to restrict out-of-scope responses or define what the model cannot say, which is a significant risk for a customer-facing chatbot.' },
+        { type:'critical', icon:'🔴', title:'RAG sources unvalidated', desc:'No freshness check, source filter, or relevance threshold on retrieved policy documents is described.' },
+        { type:'warning', icon:'⚠️', title:'No eval framework', desc:'Quality of LLM outputs is measured only by downstream customer complaints, not automated evals against a golden test set.' },
+        { type:'ok', icon:'✅', title:'Escalation routing defined', desc:'Routing complex or sensitive queries to human agents is explicitly described, which is a strong signal of responsible deployment thinking.' }
+      ]
+    }
+  },
+  churn: {
+    cellId: 'ml-ops',
+    deepDive: {
+      quadrantNote: 'Monthly scoring on a trained model that is already triggering CRM workflows is a classic MLOps problem - the design phase is largely done, and the operational risks dominate.',
+      questions: [
+        { n:4, name:'Freshness', desc:'Monthly scoring is the stated cadence - is that granular enough given that churn signals like a support ticket spike or sudden login drop can appear and resolve within days?', priority:'critical' },
+        { n:5, name:'Accuracy', desc:'What is your acceptable false-positive rate for high-risk flags, given that automated CRM outreach to a healthy account has a real cost to CSM capacity and customer trust?', priority:'critical' },
+        { n:1, name:'Functional', desc:'What is your precise definition of churn - contract non-renewal, cancellation within X days, revenue contraction, or something else - and how is that label constructed historically in your training data?', priority:'critical' },
+        { n:6, name:'Data', desc:'How are you handling accounts with short tenure or sparse usage history that have insufficient signal for the model to score reliably?', priority:'secondary' },
+        { n:7, name:'Constraints', desc:'Are there contractual or privacy constraints on which user-level behavioral signals you can aggregate into account-level features, especially for enterprise customers with DPAs?', priority:'secondary' },
+        { n:2, name:'Scale', desc:'How many accounts are scored monthly, and does the CRM workflow have capacity guardrails to prevent the outreach queue from flooding CSMs if the model flags a large cohort simultaneously?', priority:'low' },
+        { n:3, name:'Latency', desc:'Since scoring is monthly batch, is there any scenario such as a sudden executive-level disengagement or a P1 support ticket that requires near-real-time re-scoring outside the monthly cycle?', priority:'low' }
+      ],
+      designRisks: [
+        { icon:'📉', label:'Label leakage risk', desc:'Contract renewal dates used as a feature can introduce leakage if they are also implicitly part of how churn is labeled, causing the model to appear accurate in training but fail on accounts mid-contract.' },
+        { icon:'🔴', label:'Static feature set decay', desc:'Features like login frequency and feature adoption will drift in meaning as the product evolves - new features, UI changes, or pricing tier shifts can silently invalidate historical feature distributions without triggering any alert.' },
+        { icon:'📊', label:'Threshold rigidity', desc:'A single high-risk threshold that triggers CRM automation treats a 51% churn probability identically to a 95% probability, likely flooding CSMs with borderline accounts and diluting intervention quality.' }
+      ],
+      operateRisks: [
+        { icon:'📊', label:'Silent model degradation', desc:'Without a defined PSI or feature drift monitor on login frequency and ticket volume, the model can quietly degrade for months between scoring cycles before anyone notices churn predictions are unreliable.' },
+        { icon:'🚨', label:'CRM feedback loop blindness', desc:'If CSM outreach successfully retains an account, that account will not churn - meaning your next training cycle will label it as a false positive and teach the model to ignore similar signals, eroding recall over time.' },
+        { icon:'💸', label:'Retraining cost ambiguity', desc:'No retraining cadence was described, creating a risk that the model is retrained only reactively after business stakeholders notice elevated churn, which is far more expensive than proactive scheduled retraining.' }
+      ]
+    },
+    scorecard: {
+      healthScore: 50,
+      scoreRationale: 'Two critical gaps (no defined success metric and no churn label definition) and one warning (no latency/infra plan for 700 rps) pull the score down from 100.',
+      findings: [
+        { type:'ok', icon:'✅', title:'Well-defined feature categories', desc:'Login frequency, feature adoption, support ticket volume, and contract renewal dates represent a solid behavioral and contractual feature mix that is both available in most SaaS data stacks and directly causally linked to churn.' },
+        { type:'critical', icon:'🔴', title:'No churn label definition stated', desc:'The product description never defines what constitutes a churn event in the training data - without a precise, consistently applied label, the model is optimizing for an ambiguous target and cannot be meaningfully evaluated.' },
+        { type:'critical', icon:'🔴', title:'No retraining or model lifecycle strategy', desc:'There is no mention of how or when the model is retrained as new churn outcomes accumulate, leaving the system vulnerable to concept drift as product usage patterns and customer segments evolve.' },
+        { type:'warning', icon:'⚠️', title:'Automated outreach without confidence tiering', desc:'Triggering CRM workflows at a binary high-risk threshold removes human judgment from the loop for borderline accounts and provides no escalation path for accounts the model scores with very high confidence.' }
+      ]
+    }
+  }
+};
+// ── END DEMO MODE DATA ───────────────────────────────────────────────
 function submitKey() {
   const key = document.getElementById('api-key-input').value.trim();
   const err = document.getElementById('api-gate-error');
@@ -1001,6 +1130,9 @@ function fillExample(type) {
 }
 
 function quickLaunch(type) {
+  // In demo mode, only allow the 3 pre-recorded chips
+  if (isDemoMode && !demoData[type]) return;
+
   productType = type;
   document.getElementById('productDesc').value = examples[type];
 
@@ -1112,15 +1244,22 @@ async function renderDeepDive(cellId) {
   document.getElementById('questions-grid').innerHTML = `
     <div style="grid-column:1/-1;display:flex;align-items:center;gap:10px;padding:16px;color:var(--muted);font-size:13px">
       <div style="width:18px;height:18px;border:2px solid var(--accent);border-top-color:transparent;border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0"></div>
-      Claude is reading your product description...
+      ${isDemoMode ? 'Loading demo analysis...' : 'Claude is reading your product description...'}
     </div>`;
-  showLoading('design-risks', 'Generating risks specific to your product...');
+  showLoading('design-risks', isDemoMode ? 'Loading pre-recorded demo results...' : 'Generating risks specific to your product...');
   document.getElementById('operate-risks').innerHTML = '';
 
   const cacheKey = cellId + '::' + desc.trim().slice(0,80);
   let ai = aiCache[cacheKey] || null;
 
-  if (!ai) {
+  // Demo mode: use pre-recorded data with small delay for realism
+  if (!ai && isDemoMode && productType && demoData[productType]) {
+    await new Promise(r => setTimeout(r, 900));
+    ai = demoData[productType].deepDive;
+    aiCache[cacheKey] = ai;
+  }
+
+  if (!ai && !isDemoMode) {
     try {
       const apiKey = sessionStorage.getItem('anthropic_key');
       const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -1203,7 +1342,14 @@ async function renderScorecard(cellId) {
 
   let ai = aiCache[cacheKey] || null;
 
-  if (!ai) {
+  // Demo mode: use pre-recorded scorecard data
+  if (!ai && isDemoMode && productType && demoData[productType]) {
+    await new Promise(r => setTimeout(r, 600));
+    ai = { ...demoData[productType].deepDive, ...demoData[productType].scorecard };
+    aiCache[cacheKey] = ai;
+  }
+
+  if (!ai && !isDemoMode) {
     try {
       const apiKey = sessionStorage.getItem('anthropic_key');
       const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -1256,7 +1402,15 @@ async function renderScorecard(cellId) {
     </div>`).join('');
 
   // Set up refine panel based on entry path
-  setupRefinePanel(cellId, desc);
+  if (isDemoMode) {
+    document.getElementById('refine-panel').innerHTML = `
+      <div style="background:#f0f0ea;border:1px solid var(--border);border-radius:12px;padding:14px 20px;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted)">
+        <span>🔒</span>
+        <span>Refine My Audit is available in full mode. <a href="javascript:void(0)" onclick="exitDemo()" style="color:var(--accent)">Enter your API key</a> to analyse and refine your own product.</span>
+      </div>`;
+  } else {
+    setupRefinePanel(cellId, desc);
+  }
 }
 // ── END CLAUDE API ENGINE ────────────────────────────────────────────
 
@@ -1344,13 +1498,72 @@ function restart() {
   productType = null;
   selectedCell = null;
   aiCache = {};
+  isDemoMode = false;
   document.getElementById('productDesc').value = '';
   document.getElementById('refineDesc').value = '';
   document.getElementById('placing-banner').style.display = 'none';
+  document.getElementById('demo-banner').style.display = 'none';
+  document.getElementById('demo-chips-note').style.display = 'none';
+  const ownDivider = document.getElementById('own-desc-divider');
+  const ownInput = document.getElementById('own-desc-input');
+  if (ownDivider) ownDivider.style.display = 'flex';
+  if (ownInput) ownInput.style.display = 'block';
+  document.querySelectorAll('.chip').forEach(c => {
+    c.classList.remove('chip-active');
+    c.style.opacity = '1';
+    c.style.pointerEvents = 'auto';
+    c.title = '';
+  });
   document.querySelectorAll('.matrix-cell').forEach(c => c.classList.remove('selected','highlighted'));
-  document.querySelectorAll('.chip').forEach(c => c.classList.remove('chip-active'));
   goStep(1);
 }
+
+function exitDemo() {
+  isDemoMode = false;
+  document.querySelectorAll('.chip').forEach(c => {
+    c.style.opacity = '1';
+    c.style.pointerEvents = 'auto';
+    c.title = '';
+  });
+  document.getElementById('demo-chips-note').style.display = 'none';
+  const ownDivider = document.getElementById('own-desc-divider');
+  const ownInput = document.getElementById('own-desc-input');
+  if (ownDivider) ownDivider.style.display = 'flex';
+  if (ownInput) ownInput.style.display = 'block';
+  document.getElementById('api-gate').style.display = 'flex';
+}
+
+function startDemo() {
+  isDemoMode = true;
+  document.getElementById('api-gate').style.display = 'none';
+  document.getElementById('demo-banner').style.display = 'flex';
+
+  const demoChips = ['fraud', 'chatbot', 'churn'];
+  document.querySelectorAll('.chip').forEach(c => {
+    const type = c.getAttribute('data-type');
+    if (demoChips.includes(type)) {
+      c.style.opacity = '1';
+      c.style.pointerEvents = 'auto';
+    } else {
+      c.style.opacity = '0.35';
+      c.style.pointerEvents = 'none';
+      c.title = 'Not available in demo mode';
+    }
+  });
+
+  document.getElementById('demo-chips-note').style.display = 'block';
+
+  const ownDivider = document.getElementById('own-desc-divider');
+  const ownInput = document.getElementById('own-desc-input');
+  if (ownDivider) ownDivider.style.display = 'flex';
+  if (ownInput) ownInput.style.display = 'block';
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  const stored = sessionStorage.getItem('anthropic_key');
+  if (stored) document.getElementById('api-gate').style.display = 'none';
+});
+// ── END API KEY GATE ─────────────────────────────────────────────────
 </script>
 </body>
 </html>
